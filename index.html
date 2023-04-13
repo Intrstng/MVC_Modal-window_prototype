@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Modal default MVC</title>
+  <link href="https://fonts.googleapis.com/css?family=Exo+2" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <div class="container" id="container">
+    <h1>Создание уже и не такого простого модального окошка!</h1>
+
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam fuga sunt voluptas, ullam, sed consequuntur ab illo
+      veniam ad totam alias voluptatibus sequi officiis, unde autem reiciendis magnam labore voluptatum?</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam fuga sunt voluptas, ullam, sed consequuntur ab illo
+      veniam ad totam alias voluptatibus sequi officiis, unde autem reiciendis magnam labore voluptatum?</p>
+    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Nam fuga sunt voluptas, ullam, sed consequuntur ab illo
+      veniam ad totam alias voluptatibus sequi officiis, unde autem reiciendis magnam labore voluptatum?</p>
+    <p class="btn"><a href="#" data-supermodal="my-custom-modal" class="modal-open"
+        title="Покажите мне модальное окошко">Открыть окно</a></p>
+
+    <div class="modal-data"></div>
+    <p class="btn"><a href="#" id="clear-data" class="clear-data" style="display: none;">Очистить данные</a></p>
+  </div>
+
+  <div class="modal-overlay modal_closed" id="modal-overlay"></div>
+  <div class="modal modal_closed" id="my-custom-modal">
+    <header class="modal__header">
+      <a href="#" class="modal__close" id="modal-close" title="Закрыть модальное окно">Закрыть</a>
+      <h2>Введите данные</h2>
+    </header>
+
+    <main class="modal__content">
+      <div class="form-field">
+        <label for="name">Ваше имя:</label>
+        <input required class="input__default" type="text" id="name" name="name">
+      </div>
+      <div class="form-field">
+        <label>Ваш день рождения:</label>
+        <input required type="number" class="input__date-birth" id="birth-day" name="name" placeholder="День"> -
+        <input required type="number" class="input__date-birth" id="birth-month" name="name" placeholder="Месяц"> -
+        <input required type="number" class="input__date-birth" id="birth-year" name="name" placeholder="Год">
+      </div>
+    </main>
+
+    <footer class="modal__footer">
+      <button id="modal-cancel" class="modal__cancel" title="Отмена">Отмена</button>
+      <button id="modal-save" class="modal__save" title="Сохранить">Сохранить данные</button>
+    </footer>
+  </div>
+
+  <script>
+
+    /* ------- begin view -------- */
+    function ModalView() {
+      let myModal = null;
+      let myModalOverlay = null;
+      let container = null;
+      let nameUserInp = null;
+      let dayInp = null;
+      let monthInp = null;
+      let yearInp = null;
+      let btnSave = null;
+      let btnClearResult = null;
+    }
+      ModalView.prototype.init = function (container, containerModal, overlay) {
+        myContainer = container; // контейнер с элементом для вывода данных и кнопок открыть и очистить
+        myModal = containerModal; // контейнер модального окна
+        myModalOverlay = overlay; // overlay
+
+        nameUserInp = myModal.querySelector("#name"); //здесь и ниже лучше чтобы был класс, а не id, но его нет в разметке
+        dayInp = myModal.querySelector("#birth-day");
+        monthInp = myModal.querySelector("#birth-month");
+        yearInp = myModal.querySelector("#birth-year");
+        btnSave = myModal.querySelector(".modal__save");
+        btnClearResult = myContainer.querySelector(".clear-data"); // кнопка для удаления ключа из LocalStorage
+      }
+    
+      ModalView.prototype.myModalShow = function () {
+        myModal.classList.remove("modal_closed");
+      }
+
+      ModalView.prototype.myModalHide = function () {
+        myModal.classList.add("modal_closed");
+      }
+
+      ModalView.prototype.myModalOverlayShow = function () {
+        myModalOverlay.classList.remove("modal_closed");
+      }
+
+      ModalView.prototype.myModalOverlayHide = function () {
+        myModalOverlay.classList.add("modal_closed");
+      }
+
+      ModalView.prototype.printViewData = function (name, day, month, year) { // вывести данные из хранилища в div.modal-data
+        myContainer.querySelector(".modal-data").textContent = `Привет ${name}!!! У Вас день рождения ${day} / ${month} / ${year}.`
+        myContainer.querySelector(".clear-data").style.display = "inline"; // не block, т.к. у нас <a></a> строчный тег и мы сохраняем для него его inline по умолчанию
+      }
+
+      ModalView.prototype.clearViewData = function () { // выдать дефолтное сообщение только для div.modal-data
+        myContainer.querySelector(".modal-data").textContent = "Отсутсвуют данные...";    
+        myContainer.querySelector(".clear-data").style.display = "none";
+      }
+
+      ModalView.prototype.blankViewData = function () { // очистить сообщение только для div.modal-data
+        myContainer.querySelector(".modal-data").textContent = "";
+        myContainer.querySelector(".clear-data").style.display = "none";
+      }
+
+      ModalView.prototype.clearInputs = function () { // очищаем инпуты
+        nameUserInp.value = "";
+        dayInp.value = "";
+        monthInp.value = "";
+        yearInp.value = "";
+      }
+      ModalView.prototype.disableBtnSave = function (state) {
+        btnSave.disabled = state;
+      }
+ 
+    /* -------- end view --------- */
+
+    /* ------- begin model ------- */
+    function ModalModel() {
+      let myModalView = null;
+      let user = {};
+    }
+      ModalModel.prototype.init = function (view) {
+        myModalView = view;
+      }
+
+      ModalModel.prototype.openModal = function () {
+        myModalView.myModalShow();
+        myModalView.myModalOverlayShow();
+      }
+
+      ModalModel.prototype.closeModal = function () {
+        myModalView.myModalHide();
+        myModalView.myModalOverlayHide();
+      }
+
+      ModalModel.prototype.saveModalData = function (inpName, inpDay, inpMonth, inpYear) { // получить данные из инпутов модального окна и вызвать метод на сохранение в localStorage
+        user = {
+          name: inpName,
+          birthDay: inpDay,
+          birthMonth: inpMonth,
+          birthYear: inpYear,
+        };
+        this.storeData(user); // сохранить данные в localStorage
+      }
+
+      ModalModel.prototype.storeData = function (data) { // сохранить данные в localStorage
+        localStorage.setItem("userInfo", JSON.stringify(data));
+      }
+
+      ModalModel.prototype.getData = function () { // достать данные из localStorage и передать их во View
+        const objFromLocalStorage = JSON.parse(localStorage.getItem("userInfo"));
+        const { name, birthDay: day, birthMonth: month, birthYear: year } = objFromLocalStorage;
+        myModalView.printViewData(name, day, month, year);
+      }
+
+      ModalModel.prototype.blankViewData = function () { 
+        if (!localStorage.getItem("userInfo")) {
+          myModalView.blankViewData(); // если localStorage пустой, в выводе View ""
+        } else this.getData(); // иначе достать данные из localStorage и передать их во View
+      }
+
+      ModalModel.prototype.clearData = function () { // очистить данные в хранилище и в выводе в представлении
+        localStorage.removeItem("userInfo");
+        myModalView.clearViewData();
+      }
+
+      ModalModel.prototype.clearForm = function () { // очистить данные инпутов в форме
+        myModalView.clearInputs();
+      }
+      ModalModel.prototype.disableButton = function (state) {
+        myModalView.disableBtnSave(state);
+      }
+
+      ModalModel.prototype.myModalShow = function () {
+        myModalView.myModalShow();
+      }
+
+      ModalModel.prototype.myModalHide = function () {
+        myModalView.myModalHide();
+      }
+
+      ModalModel.prototype.myModalOverlayShow = function () { // отразить оверлей
+        myModalView.myModalOverlayShow();
+      }
+
+      ModalModel.prototype.myModalOverlayHide = function () { // скрыть оверлей
+        myModalView.myModalOverlayHide();
+      }
+    
+    /* -------- end model -------- */
+
+    /* ----- begin controller ---- */
+    function ModalController() {
+      let myModalContainer = null;
+      let myModalModel = null;
+      let nameUserInp = null;
+      let dayInp = null;
+      let monthInp = null;
+      let yearInp = null;
+    }
+      ModalController.prototype.init = function (model, containerModal, containerMain) { // получаем кнопки и вешаем обработчики
+        myModalContainer = containerModal;  // это модальное окно
+        myModalModel = model; // это связь с моделью
+        myContainer = containerMain; // это контейнер (он включает в себя элемент для вывода данных, кнопку открыть окно и кнопку очистить)
+
+        const btnSave = myModalContainer.querySelector(".modal__save");
+        btnSave.addEventListener("click", (e) => this.saveModal(e));
+
+        const btnOpenModal = myContainer.querySelector(".modal-open");
+        btnOpenModal.addEventListener("click", (e) => {
+          this.openModal(e);
+          this.disableSaveBtn(true); // disable кнопки по умолчанию при открытии модального окна
+        });
+        const btnModalCancel = myModalContainer.querySelector(".modal__cancel");
+        btnModalCancel.addEventListener("click", (e) => this.hideModal(e)); // !!!!!!!!!
+        const btnModalClose = myModalContainer.querySelector(".modal__close");
+        btnModalClose.addEventListener("click", (e) => this.hideModal(e));
+        nameUserInp = myModalContainer.querySelector("#name"); //здесь и ниже лучше чтобы был класс, а не id, но его нет в разметке
+        dayInp = myModalContainer.querySelector("#birth-day");
+        monthInp = myModalContainer.querySelector("#birth-month");
+        yearInp = myModalContainer.querySelector("#birth-year");
+        const inputs = myModalContainer.querySelector(".modal__content");
+        inputs.addEventListener("input", (e) => this.changeSendBtnDisabledState(e));
+        const btnClearResult = myContainer.querySelector(".clear-data");
+        btnClearResult.addEventListener("click", (e) => this.clearData(e));
+      }
+
+      ModalController.prototype.openModal = function (e) {
+        e.preventDefault();
+        myModalModel.openModal();
+      }
+
+      ModalController.prototype.hideModal = function (e) {
+        e.preventDefault();
+        myModalModel.closeModal();
+        myModalModel.clearForm();
+        myModalModel.disableButton(true);
+      }
+
+      ModalController.prototype.changeSendBtnDisabledState = function (e) { // валидация введены ли данные и передача флага на раздизебливание кнопки "Сохранить данные"
+        if (e.target.nodeName != "INPUT") return;
+        if (nameUserInp.value && dayInp.value && monthInp.value && yearInp.value) {
+          myModalModel.disableButton(false);
+        }
+      }
+
+      ModalController.prototype.getDataFromInputs = function (inpName, inpDay, inpMonth, inpYear) { // получаем данные из инпутов и передаем на сохранение в Модель
+        myModalModel.saveModalData(inpName, inpDay, inpMonth, inpYear);
+      }
+
+      ModalController.prototype.saveModal = function (e) { // действия после нажатия на кнопку "Сохранить данные"
+        e.preventDefault();
+        this.getDataFromInputs(nameUserInp.value, dayInp.value, monthInp.value, yearInp.value); // получаем данные из инпутов и передаем на сохранение в Модель
+        this.hideModal(e);
+        myModalModel.getData();
+      }
+      ModalController.prototype.clearData = function (e) { // очистить данные в localStorage и в выводе в представлении
+        e.preventDefault();
+        myModalModel.clearData();
+      }
+      ModalController.prototype.disableSaveBtn = function (state) {
+        myModalModel.disableButton(state);
+      }
+      ModalController.prototype.blankViewData = function () { // если localStorage пустой, в выводе View "", если нет в выводе View показать данные из localStorage
+        myModalModel.blankViewData();
+      }
+    /* ------ end controller ----- */
+
+    // Глобальная инициализация
+    const appModalView = new ModalView();
+    const appModalModel = new ModalModel();
+    const appModalController = new ModalController();
+    const container = document.querySelector("#container"); // по уникальному id (т.к. он может быть только один на странице)
+    const modalWindow = document.querySelector("#my-custom-modal");
+    const overlay = document.querySelector("#modal-overlay");
+
+    // Вызываем init-методы
+    // В экземпляр appModalView класса ModalView (Представление) передаем контейнер (он включает в себя элемент для вывода данных и кнопку открыть окно, кнопку очистить) и контейнер модального окна
+    // Также передаем overlay, чтобы при увеличении числа экземпляров у каждого была связь со своим оверлеем
+    appModalView.init(container, modalWindow, overlay);
+    
+    // В экземпляр appModalModel класса appModalModel (Модель) передаем экземпляр представления
+    appModalModel.init(appModalView);
+
+    // В экземпляр appModalController класса ModalController (Контроллер) передаем модель и 2 вышеупомянутых контейнера
+    appModalController.init(appModalModel, modalWindow, container);
+
+    window.onload = appModalController.blankViewData();
+  </script>
+</body>
+</html>
