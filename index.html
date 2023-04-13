@@ -77,6 +77,7 @@
         yearInp = myModal.querySelector("#birth-year");
         btnSave = myModal.querySelector(".modal__save");
         btnClearResult = myContainer.querySelector(".clear-data"); // кнопка для удаления ключа из LocalStorage
+        resultField = myContainer.querySelector(".modal-data"); // элемент в который выводим результат
       }
     
       ModalView.prototype.myModalShow = function () {
@@ -96,18 +97,18 @@
       }
 
       ModalView.prototype.printViewData = function (name, day, month, year) { // вывести данные из хранилища в div.modal-data
-        myContainer.querySelector(".modal-data").textContent = `Привет ${name}!!! У Вас день рождения ${day} / ${month} / ${year}.`
-        myContainer.querySelector(".clear-data").style.display = "inline"; // не block, т.к. у нас <a></a> строчный тег и мы сохраняем для него его inline по умолчанию
+        resultField.textContent = `Привет ${name}!!! У Вас день рождения ${day} / ${month} / ${year}.`
+        btnClearResult.style.display = "inline"; // не block, т.к. у нас <a></a> строчный тег и мы сохраняем для него его inline по умолчанию
       }
 
       ModalView.prototype.clearViewData = function () { // выдать дефолтное сообщение только для div.modal-data
-        myContainer.querySelector(".modal-data").textContent = "Отсутсвуют данные...";    
-        myContainer.querySelector(".clear-data").style.display = "none";
+        resultField.textContent = "Отсутсвуют данные...";    
+        btnClearResult.style.display = "none";
       }
 
       ModalView.prototype.blankViewData = function () { // очистить сообщение только для div.modal-data
-        myContainer.querySelector(".modal-data").textContent = "";
-        myContainer.querySelector(".clear-data").style.display = "none";
+        resultField.textContent = "";
+        btnClearResult.style.display = "none";
       }
 
       ModalView.prototype.clearInputs = function () { // очищаем инпуты
@@ -231,6 +232,8 @@
         inputs.addEventListener("input", (e) => this.changeSendBtnDisabledState(e));
         const btnClearResult = myContainer.querySelector(".clear-data");
         btnClearResult.addEventListener("click", (e) => this.clearData(e));
+
+        this.blankViewData();
       }
 
       ModalController.prototype.openModal = function (e) {
@@ -293,7 +296,6 @@
     // В экземпляр appModalController класса ModalController (Контроллер) передаем модель и 2 вышеупомянутых контейнера
     appModalController.init(appModalModel, modalWindow, container);
 
-    window.onload = appModalController.blankViewData();
   </script>
 </body>
 </html>
